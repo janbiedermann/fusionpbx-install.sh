@@ -4,7 +4,7 @@
 apt-get -q update && apt-get upgrade -y
 
 #install git
-apt-get install -y git
+apt-get install -y git lsb-release
 
 #get the install script
 cd /usr/src && git clone https://github.com/fusionpbx/fusionpbx-install.sh.git

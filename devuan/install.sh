@@ -3,10 +3,13 @@
 #move to script directory so all relative paths work
 cd "$(dirname "$0")"
 
+export SWITCH_SOURCE=false
+
 #includes
 . ./resources/config.sh
 . ./resources/colors.sh
 . ./resources/environment.sh
+. ./resources/arguments.sh
 
 #Update to latest packages
 verbose "Update installed packages"
@@ -16,11 +19,12 @@ apt-get -q update && apt-get -q --assume-yes upgrade
 
 #Add dependencies
 apt-get install -y wget
-apt-get install -y lsb-release
 apt-get install -y ca-certificates
 apt-get install -y dialog
 apt-get install -y nano
 apt-get install -y net-tools
+apt-get install -y gpg
+apt-get install -y openntpd
 
 #SNMP
 apt-get install -y snmpd
@@ -30,11 +34,8 @@ service snmpd restart
 #IPTables
 resources/iptables.sh
 
-#Optional CLI SIP monitoring tool
+#sngrep
 resources/sngrep.sh
-
-#FusionPBX
-resources/fusionpbx.sh
 
 #PHP
 resources/php.sh
@@ -42,14 +43,20 @@ resources/php.sh
 #NGINX web server
 resources/nginx.sh
 
+#FusionPBX
+resources/fusionpbx.sh
+
+#Optional Applications
+resources/applications.sh
+
+#Fail2ban
+# resources/fail2ban.sh
+
 #Postgres
 resources/postgresql.sh
 
 #FreeSWITCH
 resources/switch.sh
-
-#Fail2ban
-resources/fail2ban.sh
 
 #set the ip address
 server_address=$(hostname -I)

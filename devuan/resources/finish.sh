@@ -20,7 +20,6 @@ export PGPASSWORD=$database_password
 #sudo -u postgres psql --host=$database_host --port=$database_port --username=$database_username -c "ALTER USER fusionpbx WITH PASSWORD '$database_password';"
 #sudo -u postgres psql --host=$database_host --port=$database_port --username=$database_username -c "ALTER USER freeswitch WITH PASSWORD '$database_password';"
 sudo -u postgres psql -c "ALTER USER fusionpbx WITH PASSWORD '$database_password';"
-sudo -u postgres psql -c "ALTER USER freeswitch WITH PASSWORD '$database_password';"
 
 #install the database backup
 cp backup/fusionpbx-backup /etc/cron.daily
@@ -30,19 +29,12 @@ chmod 755 /etc/cron.daily/fusionpbx-maintenance
 sed -i "s/zzz/$database_password/g" /etc/cron.daily/fusionpbx-backup
 sed -i "s/zzz/$database_password/g" /etc/cron.daily/fusionpbx-maintenance
 
-#add the config.php
-mkdir -p /etc/fusionpbx
-chown -R www-data:www-data /etc/fusionpbx
-cp fusionpbx/config.php /etc/fusionpbx
-sed -i /etc/fusionpbx/config.php -e s:"{database_host}:$database_host:"
-sed -i /etc/fusionpbx/config.php -e s:'{database_username}:fusionpbx:'
-sed -i /etc/fusionpbx/config.php -e s:"{database_password}:$database_password:"
-
 #add the config.conf
 mkdir -p /etc/fusionpbx
 chown -R www-data:www-data /etc/fusionpbx
 cp fusionpbx/config.conf /etc/fusionpbx
 sed -i /etc/fusionpbx/config.conf -e s:"{database_host}:$database_host:"
+sed -i /etc/fusionpbx/config.conf -e s:"{database_name}:$database_name:"
 sed -i /etc/fusionpbx/config.conf -e s:'{database_username}:fusionpbx:'
 sed -i /etc/fusionpbx/config.conf -e s:"{database_password}:$database_password:"
 
@@ -111,9 +103,15 @@ cd /var/www/fusionpbx && /usr/bin/php /var/www/fusionpbx/core/upgrade/upgrade.ph
 #install the services
 cd /var/www/fusionpbx && /usr/bin/php /var/www/fusionpbx/core/upgrade/upgrade.php --services
 
-#add xml cdr import to crontab
-#apt install cron
-#cat <(crontab -l) <(echo "* * * * * $(which php) /var/www/fusionpbx/app/xml_cdr/xml_cdr_import.php 300") | crontab -
+#install crontab
+apt install cron
+
+#update file permissions
+chmod 664 /etc/fusionpbx/config.conf
+
+#restart nginx
+/usr/sbin/service nginx restart
+/usr/sbin/service freeswitch restart
 
 #welcome message
 echo ""
@@ -148,3 +146,6 @@ echo "      https://fusionpbx.com/support.php"
 echo "      https://www.fusionpbx.com"
 echo "      http://docs.fusionpbx.com"
 echo ""
+
+# pgpassword security and conflict avoidance
+unset PGPASSWORD

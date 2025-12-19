@@ -8,15 +8,17 @@ cd "$(dirname "$0")"
 . ./colors.sh
 . ./environment.sh
 
-#TODO fix or remove source installation
 if [ .$switch_source = .true ]; then
-    echo 'Building from source on devuan will most liley fail, aborting.'
-    exit 1
 	if [ ."$switch_branch" = "master" ]; then
+		echo "MASTER"
 		switch/source-master.sh
 	else
+		echo "RELEASE"
 		switch/source-release.sh
 	fi
+
+	#add sounds and music files
+	switch/source-sounds.sh
 
 	#copy the switch conf files to /etc/freeswitch
 	switch/conf-copy.sh
@@ -26,9 +28,7 @@ if [ .$switch_source = .true ]; then
 
 	#sysvinit service
 	switch/source-sysvinit.sh
-fi
-
-if [ .$switch_package = .true ]; then
+else
 	if [ ."$switch_branch" = "master" ]; then
 		if [ .$switch_package_all = .true ]; then
 			switch/package-master-all.sh

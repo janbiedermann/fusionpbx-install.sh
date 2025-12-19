@@ -11,36 +11,24 @@ cd "$(dirname "$0")"
 #send a message
 verbose "Configuring PHP"
 
-#set php version
-#chimaera - bullseye
-#beowolf - buster
-if [ ."$os_codename" = ."beowolf" ]; then
-      php_version=7.3
-fi
-if [ ."$os_codename" = ."chimaera" ]; then
-      php_version=7.4
-fi
-
 #install dependencies
 apt-get install -y nginx
-if [ ."$php_version" = ."" ]; then
-		apt-get install -y php php-cli php-fpm php-pgsql php-sqlite3 php-odbc php-curl php-imap php-xml php-gd
+if [ ."$php_version" = ."8.2" ]; then
+	apt-get install -y --no-install-recommends php8.2 php8.2-common php8.2-cli php8.2-dev php8.2-fpm php8.2-pgsql php8.2-sqlite3 php8.2-odbc php8.2-curl php8.2-imap php8.2-xml php8.2-gd php8.2-mbstring php8.2-ldap php8.2-inotify php8.2-snmp
 fi
-if [ ."$php_version" = ."7.3" ]; then
-		apt-get install -y php7.3 php7.3-cli php7.3-fpm php7.3-pgsql php7.3-sqlite3 php7.3-odbc php7.3-curl php7.3-imap php7.3-xml php7.3-gd php7.3-mbstring
-fi
-if [ ."$php_version" = ."7.4" ]; then
-		apt-get install -y php7.4 php7.4-cli php7.4-dev php7.4-fpm php7.4-pgsql php7.4-sqlite3 php7.4-odbc php7.4-curl php7.4-imap php7.4-xml php7.4-gd php7.4-mbstring
+if [ ."$php_version" = ."8.4" ]; then
+    # php8.4-imap is not available
+	apt-get install -y --no-install-recommends php8.4 php8.4-common php8.4-cli php8.4-dev php8.4-fpm php8.4-pgsql php8.4-sqlite3 php8.4-odbc php8.4-curl php8.4-xml php8.4-gd php8.4-mbstring php8.4-ldap php8.4-inotify php8.4-snmp
 fi
 
 #update config if source is being used
-if [ ."$php_version" = ."7.3" ]; then
-        verbose "version 7.3"
-        php_ini_file='/etc/php/7.3/fpm/php.ini'
+if [ ."$php_version" = ."8.2" ]; then
+        verbose "version 8.2"
+        php_ini_file='/etc/php/8.2/fpm/php.ini'
 fi
-if [ ."$php_version" = ."7.4" ]; then
-        verbose "version 7.4"
-        php_ini_file='/etc/php/7.4/fpm/php.ini'
+if [ ."$php_version" = ."8.4" ]; then
+        verbose "version 8.4"
+        php_ini_file='/etc/php/8.4/fpm/php.ini'
 fi
 sed 's#post_max_size = .*#post_max_size = 80M#g' -i $php_ini_file
 sed 's#upload_max_filesize = .*#upload_max_filesize = 80M#g' -i $php_ini_file
@@ -53,9 +41,9 @@ if [ .$cpu_architecture = .'x86' ]; then
 fi
 
 #restart php-fpm
-if [ ."$php_version" = ."7.3" ]; then
-    /usr/sbin/service php7.3-fpm restart
+if [ ."$php_version" = ."8.2" ]; then
+    /usr/sbin/service php8.2-fpm restart
 fi
-if [ ."$php_version" = ."7.4" ]; then
-    /usr/sbin/service php7.4-fpm restart
+if [ ."$php_version" = ."8.4" ]; then
+    /usr/sbin/service php8.4-fpm restart
 fi

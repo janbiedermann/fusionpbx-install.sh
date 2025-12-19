@@ -6,7 +6,7 @@ echo "deb http://files.freeswitch.org/repo/deb/debian-unstable/ jessie main" >> 
 apt-get update
 apt-get install -y gnupg gnupg2
 apt-get install -y wget lsb-release
-apt-get install -y ntp gdb
+apt-get install -y gdb
 apt-get install -y freeswitch-meta-bare freeswitch-conf-vanilla freeswitch-mod-commands freeswitch-meta-codecs freeswitch-mod-console freeswitch-mod-logfile freeswitch-mod-distributor
 apt-get install -y freeswitch-lang-en freeswitch-mod-say-en freeswitch-sounds-en-us-callie
 apt-get install -y freeswitch-mod-enum freeswitch-mod-cdr-csv freeswitch-mod-event-socket freeswitch-mod-sofia freeswitch-mod-sofia-dbg freeswitch-mod-loopback

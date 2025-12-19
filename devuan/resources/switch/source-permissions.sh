@@ -1,6 +1,9 @@
-#setup owner and group, permissions and sticky
-chown -R www-data:www-data /usr/local/freeswitch
-chmod -R ug+rw /usr/local/freeswitch
-touch /var/log/freeswitch/freeswitch.log
+#current (same paths as package)
+
+#default permissions
+chown -R www-data:www-data /etc/freeswitch
+chown -R www-data:www-data /var/lib/freeswitch
+chown -R www-data:www-data /usr/share/freeswitch
 chown -R www-data:www-data /var/log/freeswitch
-find /usr/local/freeswitch -type d -exec chmod 2770 {} \;
+chown -R www-data:www-data /var/run/freeswitch
+chown -R www-data:www-data /var/cache/fusionpbx

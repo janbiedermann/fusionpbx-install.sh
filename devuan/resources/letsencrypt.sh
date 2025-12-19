@@ -4,12 +4,15 @@
 # Mark J Crane <markjcrane@fusionpbx.com>
 # Copyright (C) 2018
 # All Rights Reserved.
-      
+
 #move to script directory so all relative paths work
 cd "$(dirname "$0")"
 
 #includes
 . ./config.sh
+
+#Add dependencies
+apt-get install -y curl
 
 #remove dehyrdated letsencrypt script
 rm /usr/local/sbin/dehydrated
@@ -124,4 +127,4 @@ if [ .$switch_tls = ."true" ]; then
 	#set the permissions
 	chown -R www-data:www-data /etc/freeswitch/tls
 
-fi  
+fi

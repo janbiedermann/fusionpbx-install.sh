@@ -26,31 +26,15 @@ if [ ."$database_repo" = ."system" ]; then
 	fi
 fi
 
-#postgres official repository
-##TODO would newer versions work without systemd?
-if [ ."$database_repo" = ."official" ]; then
-    verbose "Using official repos"
-	echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' > /etc/apt/sources.list.d/pgdg.list
-	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-	apt-get -q update && apt-get upgrade -y
-	apt-get install -y postgresql
-fi
-
-#Add PostgreSQL and BDR REPO
-##TODO would newer versions work without systemd?
-if [ ."$database_repo" = ."2ndquadrant" ]; then
-    verbose "Using 2ndquadrant.com repos"
-	echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main'  >> /etc/apt/sources.list.d/postgresql.list
-	echo 'deb http://packages.2ndquadrant.com/bdr/apt/ jessie-2ndquadrant main' >> /etc/apt/sources.list.d/2ndquadrant.list
-	wget --quiet -O - http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
-	wget --quiet -O - http://packages.2ndquadrant.com/bdr/apt/AA7A6805.asc | apt-key add -
-	apt-get -q update && apt-get upgrade -y
-	apt-get install -y postgresql-bdr-9.4 postgresql-bdr-9.4-bdr-plugin postgresql-bdr-contrib-9.4
-fi
-
-#init.d
+# install postgres
 if [ ."$database_host" = ."127.0.0.1" ] || [ ."$database_host" = ."::1" ] ; then
-    /usr/sbin/service postgresql restart
+	if [ ."$database_version" = ."latest" ]; then
+		apt-get install -y sudo postgresql
+	else
+		apt-get install -y sudo postgresql-$database_version
+	fi
+else
+	apt-get install -y sudo postgresql-client
 fi
 
 #install the database backup
@@ -61,20 +45,36 @@ fi
 #sed -i "s/zzz/$password/g" /etc/cron.daily/fusionpbx-backup
 #sed -i "s/zzz/$password/g" /etc/cron.daily/fusionpbx-maintenance
 
+#initialize the database
+pg_createcluster $database_version main
+
+#replace scram-sha-256 with md5
+sed -i /etc/postgresql/$database_version/main/pg_hba.conf -e '/^#/!s/scram-sha-256/md5/g'
+
+#init.d
+if [ ."$database_host" = ."127.0.0.1" ] || [ ."$database_host" = ."::1" ] ; then
+    /usr/sbin/service postgresql restart
+fi
+
 #move to /tmp to prevent a red herring error when running sudo with psql
 cwd=$(pwd)
 cd /tmp
-
 if [ ."$database_host" = ."127.0.0.1" ] || [ ."$database_host" = ."::1" ] ; then
-	# add the databases, users and grant permissions to them
+	#reload the config
+  sudo -u postgres psql -c "SELECT pg_reload_conf();"
+
+	#set client encoding
+	sudo -u postgres psql -c "SET client_encoding = 'UTF8';";
+
+	#add the database users and databases
 	sudo -u postgres psql -c "CREATE DATABASE fusionpbx;";
-	sudo -u postgres psql -c "CREATE DATABASE freeswitch;";
+
+ 	#add the users and grant permissions
 	sudo -u postgres psql -c "CREATE ROLE fusionpbx WITH SUPERUSER LOGIN PASSWORD '$password';"
-	sudo -u postgres psql -c "CREATE ROLE freeswitch WITH SUPERUSER LOGIN PASSWORD '$password';"
 	sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE fusionpbx to fusionpbx;"
-	sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE freeswitch to fusionpbx;"
-	sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE freeswitch to freeswitch;"
-	# ALTER USER fusionpbx WITH PASSWORD 'newpassword';
+
+ 	#update the fusionpbx user password
+	#ALTER USER fusionpbx WITH PASSWORD 'newpassword';
 fi
 
 cd $cwd

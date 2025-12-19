@@ -14,35 +14,17 @@ cpu_mode='unknown'
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 #debian release name
-if [ .$os_codename = .'chimaera' ]; then
-    os_codename_debian='bullseye'
-elif [ .$os_codename = .'beowulf' ]; then
-    os_codename_debian='buster'
+if [ .$os_codename = .'excalibur' ]; then
+		os_codename_debian='trixie'
+elif [ .$os_codename = .'daedalus' ]; then
+		os_codename_debian='bookworm'
 else
-    warning "couldn't set a matching debian codename, are you using an old devuan release?"
+    error "couldn't set a matching debian codename, are you using an old devuan release?"
+		exit 1
 fi
 
 #check what the CPU and OS are
-if [ .$cpu_name = .'armv6l' ]; then
-	# RaspberryPi Zero
-	os_mode='32'
-	cpu_mode='32'
-	cpu_architecture='arm'
-elif [ .$cpu_name = .'armv7l' ]; then
-	# RaspberryPi 3 is actually armv8l but current Raspbian reports the cpu as armv7l and no Raspbian 64Bit has been released at this time
-	os_mode='32'
-	cpu_mode='32'
-	cpu_architecture='arm'
-elif [ .$cpu_name = .'armv8l' ]; then
-	# No test case for armv8l
-	os_mode='unknown'
-	cpu_mode='64'
-	cpu_architecture='arm'
-elif [ .$cpu_name = .'aarch64' ]; then
-	os_mode='64'
-	cpu_mode='64'
-	cpu_architecture='arm'
-elif [ .$cpu_name = .'i386' ]; then
+if [ .$cpu_name = .'i386' ]; then
 	os_mode='32'
 	if [ .$(grep -o -w 'lm' /proc/cpuinfo | head -n 1) = .'lm' ]; then
 		cpu_mode='64'
@@ -71,19 +53,7 @@ else
 	exit 3
 fi
 
-if [ .$cpu_architecture = .'arm' ]; then
-	if [ .$os_mode = .'32' ]; then
-		verbose "Correct CPU and Operating System detected, using the ARM repo"
-	elif [ .$os_mode = .'64' ]; then
-		error "You are using a 64bit arm OS this is unsupported"
-		switch_source=true
-		switch_package=false
-	else
-		error "Unknown OS mode $os_mode this is unsupported"
-		switch_source=true
-		switch_package=false
-	fi
-elif [ .$cpu_architecture = .'x86' ]; then
+if [ .$cpu_architecture = .'x86' ]; then
 	if [ .$os_mode = .'32' ]; then
 		error "You are using a 32bit OS this is unsupported"
 		if [ .$cpu_mode = .'64' ]; then
@@ -106,4 +76,11 @@ else
 	warning "os_mode:'$os_mode'"
 	warning "cpu_name:'$cpu_name'"
 	exit 3
+fi
+
+#set php version
+if [ .$os_codename = .'daedalus' ]; then
+    php_version=8.2
+elif [ .$os_codename = .'excalibur' ]; then
+    php_version=8.4
 fi

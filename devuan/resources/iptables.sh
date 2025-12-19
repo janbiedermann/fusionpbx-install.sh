@@ -13,11 +13,12 @@ cd "$(dirname "$0")"
 verbose "Configuring IPTables"
 
 #defaults to nftables by default this enables iptables
-if [ ."$os_codename" = ."beowulf" ]; then
+if [ ."$os_codename" = ."daedalus" ]; then
+	apt-get install -y iptables
 	update-alternatives --set iptables /usr/sbin/iptables-legacy
 	update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 fi
-if [ ."$os_codename" = ."chimaera" ]; then
+if [ ."$os_codename" = ."excalibur" ]; then
 	apt-get install -y iptables
 	update-alternatives --set iptables /usr/sbin/iptables-legacy
 	update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
@@ -28,6 +29,30 @@ fi
 [ -x /usr/sbin/ufw ] && ufw disable
 apt-get remove -y ufw
 #apt-get purge ufw
+iptables --delete-chain ufw-after-forward
+iptables --delete-chain ufw-after-input
+iptables --delete-chain ufw-after-logging-forward
+iptables --delete-chain ufw-after-logging-input
+iptables --delete-chain ufw-after-logging-output
+iptables --delete-chain ufw-after-output
+iptables --delete-chain ufw-before-forward
+iptables --delete-chain ufw-before-input
+iptables --delete-chain ufw-before-logging-forward
+iptables --delete-chain ufw-before-logging-input
+iptables --delete-chain ufw-before-logging-output
+iptables --delete-chain ufw-before-output
+iptables --delete-chain ufw-reject-forward
+iptables --delete-chain ufw-reject-input
+iptables --delete-chain ufw-reject-output
+iptables --delete-chain ufw-track-forward
+iptables --delete-chain ufw-track-input
+iptables --delete-chain ufw-track-output
+
+#flush iptables
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -F
 
 #run iptables commands
 iptables -A INPUT -i lo -j ACCEPT

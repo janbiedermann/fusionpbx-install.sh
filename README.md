@@ -21,13 +21,28 @@ cd /usr/src/fusionpbx-install.sh/ubuntu && ./install.sh
 
 ### Devuan
 If you like Debian but rather not bother with systemd, Devuan is a "drop in" replacement.
-Devuan ASCII is based on Stretch, so you will find most of the same packages available.
-Please note that the source installation and installation on ARM is not fully tested.
+Installation is meant to work on Devuan Daedalus and Excalibur, but has been tested only on Excalibur.
+Only x86 is supported, installation on ARM is not supported.
+Also fail2ban is not supported. On Excalibur php-imap is not available.
 
+First execute the pre-install.sh:
 ```sh
 wget -O - https://raw.githubusercontent.com/fusionpbx/fusionpbx-install.sh/master/devuan/pre-install.sh | sh;
-cd /usr/src/fusionpbx-install.sh/devuan && ./install.sh
 ```
+
+It will change to the `/usr/src/fusionpbx-install.sh/devuan` directory.
+
+When you have a access token for FreeSWITCH packages from SignalWire open devuan/resources/config.sh, edit `switch_token` accordingly and execute the install script:
+```sh
+sh install.sh
+```
+
+Otherwise, to install FreeSWITCH from source, use:
+```sh
+sh install.sh --use-switch-source
+```
+
+Good Luck!
 
 ### FreeBSD
 FreeBSD is an operating system that has many great features like ZFS, HAST, CARP and more.
